@@ -50,6 +50,7 @@
   .btn:active { transform: translateY(0); }
   .btn.secondary { background: #23273a; color: #c8cde0; box-shadow: none; }
   .btn:disabled { opacity: .5; cursor: not-allowed; transform: none !important; }
+  .btn.gold { background: #b388ff; color: #14162b; box-shadow: 0 4px 16px rgba(179,136,255,0.3); }
 
   .hud {
     position: fixed; top: 0; left: 0; right: 0; padding: 12px 16px;
@@ -62,6 +63,15 @@
   .bar-wrap { width: 180px; height: 8px; background: #1b1f30; border-radius: 999px; overflow: hidden; margin-top: 4px; }
   .hp-bar { height: 100%; background: #ff4d6a; width: 100%; transition: width .12s; }
   .xp-bar { height: 100%; background: #5cf2a8; width: 0%; transition: width .12s; }
+  
+  /* HUD 图标化 */
+  #weaponText { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; max-width: 200px; margin-top: 4px;}
+  .w-tag {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold;
+    background: rgba(0,0,0,0.6); border: 1px solid;
+  }
+
   #muteBtn {
     pointer-events: auto; margin-top: 6px; padding: 6px 10px; font-size: 12px;
     border-radius: 8px; border: 1px solid #2a2f48; background: #1a1e30; color: #9aa0b4; cursor: pointer;
@@ -90,13 +100,13 @@
   .upgrade-card h3 { font-size: 15px; margin-bottom: 4px; }
   .upgrade-card .lv { font-size: 12px; color: #5cf2a8; margin-bottom: 6px; }
   .upgrade-card p { font-size: 13px; color: #9aa0b4; }
+  .upgrade-card .lore { font-size: 11px; color: #6b7280; font-style: italic; margin-top: 8px; border-top: 1px dashed #2a2f48; padding-top: 6px; }
 
   .meta-bar { display: flex; gap: 18px; justify-content: center; align-items: center;
     margin: 6px 0 20px; font-size: 15px; color: #cdd3e8; flex-wrap: wrap; }
   .meta-bar .soul { color: #b388ff; font-weight: 700; }
   .meta-bar .best { color: #8ec5ff; }
   .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-  .btn.gold { background: #b388ff; color: #14162b; box-shadow: 0 4px 16px rgba(179,136,255,0.3); }
   .soul-earn { margin: 6px 0 2px; font-size: 16px; font-weight: 700; color: #b388ff; }
   .shop-panel { width: min(760px, 94vw); max-height: 88vh; overflow-y: auto;
     background: #14162b; border: 1px solid #2a2f4a; border-radius: 16px; padding: 24px 22px;
@@ -126,7 +136,6 @@
   .stat-value { font-size: 20px; font-weight: 700; }
   .stat-label { font-size: 12px; color: #9aa0b4; margin-top: 4px; }
 
-  /* ===== 移动端摇杆 ===== */
   .mobile-joystick {
     position: fixed; left: max(24px, env(safe-area-inset-left));
     bottom: max(24px, env(safe-area-inset-bottom));
@@ -140,7 +149,6 @@
     pointer-events: none;
   }
 
-  /* ===== 移动端冲刺按钮 ===== */
   .dash-wrap {
     position: fixed;
     right: max(24px, env(safe-area-inset-right));
@@ -177,7 +185,6 @@
     .dash-wrap { display: block; }
   }
 
-  /* ===== 移动端布局 ===== */
   @media (max-width: 600px) {
     .title { font-size: 24px; margin-bottom: 8px; }
     .subtitle { font-size: 12px; margin-bottom: 16px; line-height: 1.6; }
@@ -188,6 +195,8 @@
     .hud-text { font-size: 11px; }
     .bar-wrap { width: 120px; height: 6px; margin-top: 3px; }
     #muteBtn { font-size: 10px; padding: 4px 8px; margin-top: 4px; }
+    #weaponText { max-width: 140px; gap: 2px; }
+    .w-tag { padding: 1px 4px; font-size: 10px; }
 
     .upgrade-title { font-size: 18px; margin-bottom: 8px; }
     .upgrade-list { flex-direction: column; gap: 10px; width: 100%; align-items: center; }
@@ -195,6 +204,7 @@
     .upgrade-card h3 { font-size: 14px; }
     .upgrade-card .lv { font-size: 11px; }
     .upgrade-card p { font-size: 12px; line-height: 1.5; }
+    .upgrade-card .lore { font-size: 10px; margin-top: 6px; padding-top: 4px; }
     #upgradeActions { margin-top: 14px !important; }
     #rerollBtn { font-size: 13px; padding: 10px 20px; }
 
@@ -219,7 +229,6 @@
     .dash-btn { font-size: 14px; }
   }
 
-  /* ===== 存档面板 ===== */
   #saveCode, #loadCode {
     width: 100%;
     min-height: 64px;
@@ -254,7 +263,7 @@
     <div class="hud-text" id="timeText">00:00</div>
     <div class="hud-text" id="waveText">第 1 波</div>
     <div class="hud-text" id="killText">击杀 0</div>
-    <div class="hud-text" id="weaponText"></div>
+    <div id="weaponText"></div>
     <button id="muteBtn">音效：开</button>
   </div>
 </div>
@@ -268,7 +277,7 @@
 
 <div class="overlay" id="startScreen">
   <div class="title">幸存者：未了之事</div>
-  <div class="subtitle">移动：摇杆 / WASD · 冲刺：右侧按钮 / Shift · 自动攻击<br>波次推进 · 精英机制 · 喘息期祭坛 · 通关解锁新关卡<br>升级三选一，不满意可点「刷新选项」或按 R</div>
+  <div class="subtitle">移动：摇杆 / WASD · 冲刺：右侧按钮 / Shift · 自动攻击<br>波次推进 · 精英机制 · 喘息期随机事件 · 通关解锁新关卡<br>升级三选一，不满意可点「刷新选项」或按 R</div>
   <div class="meta-bar">
     <span class="soul">◆ 魂 <span id="menuSouls">0</span></span>
     <span class="best">最长存活 <span id="menuBest">00:00</span></span>
@@ -288,26 +297,39 @@
 </div>
 
 <div class="upgrade-panel hidden" id="upgradePanel">
-  <div class="upgrade-title">升级！选择一个强化</div>
+  <div class="upgrade-title" id="upgradeTitle">升级！选择一个强化</div>
+  <div id="upgradeTutorial" class="hidden" style="color:#5cf2a8;font-size:14px;margin-bottom:12px;font-weight:bold;animation:pulse 1.5s infinite;">点击卡片选择</div>
   <div class="upgrade-list" id="upgradeList"></div>
   <div id="upgradeActions" style="margin-top:20px; display:flex; gap:12px; justify-content:center">
     <button class="btn secondary" id="rerollBtn">刷新选项</button>
   </div>
 </div>
 
-<div class="upgrade-panel hidden" id="altarPanel">
-  <div class="upgrade-title" style="color:#ff9f45">祭坛 · 选择一个诅咒</div>
-  <div style="font-size:13px;color:#9aa0b4;margin-bottom:16px;text-align:center" id="altarCurseInfo"></div>
-  <div class="upgrade-list" id="altarList"></div>
+<!-- 通用事件面板（祭坛 / 血泉） -->
+<div class="upgrade-panel hidden" id="eventPanel">
+  <div class="upgrade-title" id="eventTitle" style="color:#ff9f45">神秘事件</div>
+  <div style="font-size:13px;color:#9aa0b4;margin-bottom:16px;text-align:center" id="eventDesc"></div>
+  <div class="upgrade-list" id="eventList"></div>
   <div style="margin-top:18px">
-    <button class="btn secondary" id="altarSkipBtn">离开祭坛（不选诅咒）</button>
+    <button class="btn secondary" id="eventSkipBtn">离开</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="pauseScreen" style="background: rgba(10,12,20,0.92);">
+  <div class="title" style="font-size: 26px;">游戏已暂停</div>
+  <div class="subtitle">页面切出浏览器时游戏会自动暂停<br>由于手机系统可能会清理后台，建议在切出前导出存档</div>
+  <div class="btn-row">
+    <button class="btn" id="resumeBtn" style="font-size: 18px; padding: 14px 40px;">继续游戏</button>
+  </div>
+  <div class="btn-row" style="margin-top: 10px;">
+    <button class="btn gold" id="pauseSaveBtn">导出当前存档</button>
   </div>
 </div>
 
 <div class="overlay hidden" id="deathScreen">
   <div class="death-panel">
     <div class="title">你倒下了</div>
-    <div class="subtitle" id="deathSub">活得越久，下一局越有希望。</div>
+    <div class="subtitle" id="deathSub">但未了之事，不允许你安息。</div>
     <div class="stat-grid">
       <div class="stat-box"><div class="stat-value" id="statTime">00:00</div><div class="stat-label">存活时间</div></div>
       <div class="stat-box"><div class="stat-value" id="statKills">0</div><div class="stat-label">击杀数</div></div>
@@ -315,7 +337,7 @@
       <div class="stat-box"><div class="stat-value" id="statWave">1</div><div class="stat-label">抵达波次</div></div>
     </div>
     <div class="soul-earn" id="statSouls">本局获得魂 +0</div>
-    <button class="btn" id="restartBtn">再来一局</button>
+    <button class="btn" id="restartBtn">再次轮回</button>
     <button class="btn secondary" id="menuBtn">返回主菜单</button>
   </div>
 </div>
@@ -323,7 +345,7 @@
 <div class="overlay hidden" id="victoryScreen">
   <div class="death-panel">
     <div class="title" style="color:#5cf2a8">关卡完成</div>
-    <div class="subtitle" id="victorySub">首领已被击败，未了之事终于了结。</div>
+    <div class="subtitle" id="victorySub">首领已被击败，执念已散。</div>
     <div class="stat-grid">
       <div class="stat-box"><div class="stat-value" id="vStatTime">00:00</div><div class="stat-label">通关时间</div></div>
       <div class="stat-box"><div class="stat-value" id="vStatKills">0</div><div class="stat-label">击杀数</div></div>
@@ -334,8 +356,8 @@
     <div id="vUnlockMsg" style="color:#ffd166;margin-bottom:8px;display:none;font-weight:700"></div>
     <div class="btn-row">
       <button class="btn gold" id="vNextStageBtn" style="display:none">下一关 →</button>
-      <button class="btn" id="vEndlessBtn">无尽模式</button>
-      <button class="btn" id="vRestartBtn">再来一局</button>
+      <button class="btn" id="vEndlessBtn">无尽轮回</button>
+      <button class="btn" id="vRestartBtn">再次挑战</button>
       <button class="btn secondary" id="vMenuBtn">返回主菜单</button>
     </div>
   </div>
@@ -354,6 +376,7 @@
     </div>
   </div>
 </div>
+
 <div class="overlay hidden" id="lbScreen">
   <div class="shop-panel">
     <div class="shop-head"><h2>排行榜</h2><span class="shop-souls">最长存活 TOP 10</span></div>
@@ -434,15 +457,25 @@
 
   const startScreen = document.getElementById("startScreen");
   const upgradePanel = document.getElementById("upgradePanel");
+  const upgradeTitle = document.getElementById("upgradeTitle");
+  const upgradeTutorial = document.getElementById("upgradeTutorial");
   const upgradeList = document.getElementById("upgradeList");
   const upgradeActions = document.getElementById("upgradeActions");
   const rerollBtn = document.getElementById("rerollBtn");
-  const altarPanel = document.getElementById("altarPanel");
-  const altarList = document.getElementById("altarList");
-  const altarCurseInfo = document.getElementById("altarCurseInfo");
-  const altarSkipBtn = document.getElementById("altarSkipBtn");
+  
+  // 通用事件面板
+  const eventPanel = document.getElementById("eventPanel");
+  const eventTitle = document.getElementById("eventTitle");
+  const eventDesc = document.getElementById("eventDesc");
+  const eventList = document.getElementById("eventList");
+  const eventSkipBtn = document.getElementById("eventSkipBtn");
+
   const deathScreen = document.getElementById("deathScreen");
   const victoryScreen = document.getElementById("victoryScreen");
+
+  const pauseScreen = document.getElementById("pauseScreen");
+  const resumeBtn = document.getElementById("resumeBtn");
+  const pauseSaveBtn = document.getElementById("pauseSaveBtn");
 
   const joystick = document.getElementById("joystick");
   const knob = document.getElementById("knob");
@@ -451,7 +484,6 @@
   const dashRing = document.getElementById("dashRing");
   const dashBtn = document.getElementById("dashBtn");
 
-  // ===== 设备检测 / 性能分级 =====
   const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
   let lowEnd = false;
   let MAX_PARTICLES = 160;
@@ -466,7 +498,6 @@
   }
   updatePerfLevel();
 
-  // ===== 武器色彩签名 =====
   const WEAPON_COLORS = {
     pistol:    "#8ec5ff",
     fan:       "#5cf2c0",
@@ -479,51 +510,54 @@
     bloodmoon: "#ff2d55"
   };
 
-  // ===== 关卡配置 =====
+  const WEAPON_SHORT = {
+    pistol: '枪', fan: '扇', orbit: '刃', nova: '脉', homing: '弹',
+    inferno: '火', hunter: '猎', tempest: '暴', bloodmoon: '血'
+  };
+
   const STAGES = [
     {
       id: 1, name: "荒原", short: "起点 · 标准节奏",
       worldSize: 2600,
-      weights: { normal: 0.75, fast: 0.20, tank: 0.05 },
+      weights: { normal: 0.55, fast: 0.15, tank: 0.05, mage: 0.15, bomber: 0.10 },
       growth: { hp: 160, dmg: 240, speed: 240 },
-      gates: { fast: 40, tank: 70 },
+      gates: { fast: 30, tank: 60, mage: 45, bomber: 100 },
       eliteWaves: { 2: 1, 4: 1, 6: 2 },
       eliteBias: null,
       bossTime: 300,
       soulMult: 1.0,
       clearReward: 100,
-      tips: "标准节奏，熟悉基础循环：普通敌人为主，第 2/4/6 波精英，5 分钟首领。"
+      lore: ["风沙掩盖了昨日的战场，但亡者的执念仍在游荡。", "黑暗中的低语越来越清晰，它们在呼唤你的名字。", "别回头，那些影子正在吞噬你的理智。"]
     },
     {
       id: 2, name: "疾风峡谷", short: "小地图 · 极速敌人",
       worldSize: 1800,
-      weights: { normal: 0.35, fast: 0.60, tank: 0.05 },
+      weights: { normal: 0.20, fast: 0.50, tank: 0.00, mage: 0.05, bomber: 0.25 },
       growth: { hp: 220, dmg: 200, speed: 100 },
-      gates: { fast: 0, tank: 60 },
+      gates: { fast: 0, tank: 999, mage: 60, bomber: 30 },
       eliteWaves: { 2: 1, 4: 1, 6: 1 },
       eliteBias: "charge",
       bossTime: 300,
       soulMult: 1.4,
       clearReward: 250,
-      tips: "地图小、敌人极快，血量不厚但非常贴脸。冲刺和走位是核心，冲锋者精英占比高。"
+      lore: ["这些变异者快得像风一样，小心你的背后。", "峡谷的风在哭泣，它们曾是这片土地的守卫。", "速度是唯一的法则，停下即是死亡。"]
     },
     {
       id: 3, name: "钢铁要塞", short: "大地图 · 厚血敌人",
       worldSize: 3200,
-      weights: { normal: 0.25, fast: 0.10, tank: 0.65 },
+      weights: { normal: 0.15, fast: 0.05, tank: 0.50, mage: 0.25, bomber: 0.05 },
       growth: { hp: 100, dmg: 200, speed: 320 },
-      gates: { fast: 30, tank: 15 },
+      gates: { fast: 30, tank: 15, mage: 20, bomber: 120 },
       eliteWaves: { 2: 1, 4: 1, 6: 2 },
       eliteBias: "shield",
       bossTime: 320,
       soulMult: 1.8,
       clearReward: 450,
-      tips: "敌人肉但慢，地图大可以风筝，考验 DPS 与清场能力。护盾守卫精英占比高。"
+      lore: ["这里曾有最坚固的城墙，直到它们从内部开始腐化。", "钢铁囚禁了肉体，却禁锢不住疯狂的灵魂。", "记录：实验体失控，基地已沦陷。"]
     }
   ];
   let curStage = STAGES[0];
 
-  // ===== 局外成长 =====
   const META_KEY = "survivor_meta_v1";
   const TALENTS = {
     vital:  { name: "生命结晶", max: 6, desc: "永久最大生命 +20",        cost: lv => 60  + lv * 45 },
@@ -537,7 +571,7 @@
     const def = { souls: 0, best: 0,
       t: { vital: 0, swift: 0, power: 0, greed: 0, reroll: 0, revive: 0 }, lb: [],
       prog: {}, done: {}, evolved: {}, daily: { date: "", win: false, time: false },
-      unlocked: [1], firstCleared: [], selectedStage: 1 };
+      unlocked: [1], firstCleared: [], selectedStage: 1, playedTutorial: false };
     try {
       const raw = localStorage.getItem(META_KEY);
       if (raw) {
@@ -550,6 +584,7 @@
         def.unlocked = Array.isArray(o.unlocked) && o.unlocked.length ? o.unlocked : [1];
         def.firstCleared = Array.isArray(o.firstCleared) ? o.firstCleared : [];
         def.selectedStage = o.selectedStage || 1;
+        def.playedTutorial = !!o.playedTutorial;
       }
     } catch (e) {}
     return def;
@@ -568,6 +603,7 @@
   let meta = loadMeta();
   let runSouls = 0, runReviveUsed = false;
   let dailyCfg = null, currentDaily = null, runHurt = false;
+  let tutorialState = 0;
 
   const ACHIEVEMENTS = {
     kill100:  { name: "初出茅庐",   desc: "单局击杀达到 100",       target: 100, reward: 60 },
@@ -591,16 +627,20 @@
 
   const CURSES = [
     { id: "greed",     name: "贪婪诅咒", color: "#ffd166",
-      desc: "魂获取 +100%，敌人移动速度 +30%（持续到更换诅咒）",
+      desc: "魂获取 +100%，敌人移动速度 +30%",
+      lore: "你听见了金币碰撞的幻听。",
       mods: { soul: 1.0, espeed: 1.3 } },
     { id: "fury",      name: "狂暴诅咒", color: "#ff4d6a",
       desc: "你的伤害 +50%，但受到伤害 +30%",
+      lore: "愤怒蒙蔽了你的双眼，也带来了力量。",
       mods: { playerDmg: 0.5, playerDmgTaken: 0.3 } },
     { id: "feast",     name: "暴食诅咒", color: "#c084fc",
       desc: "敌人生命 +40%，但经验获取 +100%",
+      lore: "吞噬一切，连自己的灵魂也不放过。",
       mods: { ehp: 1.4, xp: 1.0 } },
     { id: "bloodlust", name: "嗜血诅咒", color: "#ff6b8a",
       desc: "吸血 +100%，但敌人伤害 +25%",
+      lore: "鲜血，是这世上最甜美的美酒。",
       mods: { lifesteal: 1.0, edmg: 1.25 } }
   ];
 
@@ -623,7 +663,7 @@
 
   let waveIndex = 1, waveTimer = WAVE_DURATION, restTimer = 0, inRest = false;
   let boss = null, bossSpawned = false, endless = false, bossKills = 0;
-  let telegraphs = [], announcements = [], ebullets = [];
+  let telegraphs = [], announcements = [], ebullets = [], whispers = [];
 
   let WORLD = 2600;
   const MAX_ENEMIES = 90;
@@ -638,8 +678,12 @@
   let subBlades = [];
   let bloodPools = [];
   let curse = null;
-  let altar = null;
-  let altarOpening = false;
+  
+  // 替换单一的祭坛，改为随机事件
+  let activeEvent = null; // { type: 'altar' | 'chest' | 'fountain', x, y, r, activated, life }
+  let eventOpening = false;
+  let ambushActive = false;
+
   const dash = { t: 0, cd: 0, maxCd: 2.5, speed: 900, dur: 0.14, dirX: 0, dirY: 0 };
   let dashBuffT = 0;
   let lastMoveX = 0, lastMoveY = 0;
@@ -674,7 +718,7 @@
   const weaponDefs = {
     pistol: { name: '自动手枪', max: 6, desc: (c, n) =>
       c <= 0 ? '向最近敌人连射：单次 <b>' + _pistolN(1) + '</b> 颗 · 间隔 <b>' + _ms(_pistolI(1)) + '</b> · 每颗伤害 = 基础伤害的 <b>140%</b>'
-             : '单次弹数 ' + _pistolN(c) + ' → <b>' + _pistolN(n) + '</b> · 射击间隔 ' + _ms(_pistolI(c)) + ' → <b>' + _ms(_pistolI(n)) + '</b>（每颗 140% 伤害）' },
+             : '单次弹数 ' + _pistolN(c) + ' → <b>' + _pistolN(n) + '</b> · 射击间隔 ' + _ms(_pistolI(c)) + ' → <b>' + _ms(_pistolI(n)) + '</b>' },
     fan:    { name: '扇形弹幕', max: 5, desc: (c, n) =>
       c <= 0 ? '一次扫出扇形弹幕：<b>' + _fanN(1) + '</b> 颗 · 张角 <b>' + Math.round(_fanSpread(1)) + '°</b> · 间隔 <b>' + _ms(_fanI(1)) + '</b> · 每颗伤害 = 基础的 <b>70%</b>'
              : '弹幕数 ' + _fanN(c) + ' → <b>' + _fanN(n) + '</b> · 张角 ' + Math.round(_fanSpread(c)) + '° → <b>' + Math.round(_fanSpread(n)) + '°</b> · 间隔 ' + _ms(_fanI(c)) + ' → <b>' + _ms(_fanI(n)) + '</b>' },
@@ -683,7 +727,7 @@
              : '飞刃数 ' + _orbitN(c) + ' → <b>' + _orbitN(n) + '</b> 把 · 旋转半径 ' + _orbitR(c) + ' → <b>' + _orbitR(n) + '</b>' },
     nova:   { name: '震荡脉冲', max: 5, desc: (c, n) =>
       c <= 0 ? '周期释放冲击波：半径 <b>' + _novaR(1) + '</b> · 间隔 <b>' + _ms(_novaI(1)) + '</b> · 伤害 = 基础的 <b>170%</b> 并击退'
-             : '脉冲半径 ' + _novaR(c) + ' → <b>' + _novaR(n) + '</b> · 间隔 ' + _ms(_novaI(c)) + ' → <b>' + _ms(_novaI(n)) + '</b>（170% 伤害 + 击退）' },
+             : '脉冲半径 ' + _novaR(c) + ' → <b>' + _novaR(n) + '</b> · 间隔 ' + _ms(_novaI(c)) + ' → <b>' + _ms(_novaI(n)) + '</b>' },
     homing: { name: '追踪飞弹', max: 5, desc: (c, n) =>
       c <= 0 ? '自动索敌飞弹：齐射 <b>' + _homingN(1) + '</b> 发 · 间隔 <b>' + _ms(_homingI(1)) + '</b> · 命中爆炸 = 基础的 <b>130%</b>'
              : '齐射飞弹 ' + _homingN(c) + ' → <b>' + _homingN(n) + '</b> 发 · 间隔 ' + _ms(_homingI(c)) + ' → <b>' + _ms(_homingI(n)) + '</b>' },
@@ -781,10 +825,10 @@
   const bloodCount = () => Math.min(8, 5 + weapons.bloodmoon.level);
 
   const evoRecipes = [
-    { id: "inferno",   name: "炼狱弹幕", from: { pistol: 3, fan: 2 },    color: "#ff9f45", desc: "手枪与扇形弹幕融合为火焰弹幕，命中点燃敌人" },
-    { id: "hunter",    name: "猎杀飞弹", from: { pistol: 3, homing: 2 }, color: "#7df9ff", desc: "手枪与追踪飞弹融合，命中大幅减速" },
-    { id: "tempest",   name: "风暴核心", from: { orbit: 3, nova: 2 },    color: "#c084fc", desc: "飞刃与脉冲融合，脉冲附带眩晕" },
-    { id: "bloodmoon", name: "血月",     from: { fan: 3, nova: 2 },      color: "#ff4d6a", desc: "弹幕与脉冲融合为血月，伤害 20% 转化为生命" }
+    { id: "inferno",   name: "炼狱弹幕", from: { pistol: 3, fan: 2 },    color: "#ff9f45", desc: "手枪与扇形弹幕融合为火焰弹幕，命中点燃敌人", lore: "火焰，是净化一切的代价。" },
+    { id: "hunter",    name: "猎杀飞弹", from: { pistol: 3, homing: 2 }, color: "#7df9ff", desc: "手枪与追踪飞弹融合，命中大幅减速", lore: "他们试图控制雷电，最后成了雷电的奴隶。" },
+    { id: "tempest",   name: "风暴核心", from: { orbit: 3, nova: 2 },    color: "#c084fc", desc: "飞刃与脉冲融合，脉冲附带眩晕", lore: "灵魂被禁锢在肉体中，无法解脱。" },
+    { id: "bloodmoon", name: "血月",     from: { fan: 3, nova: 2 },      color: "#ff4d6a", desc: "弹幕与脉冲融合为血月，伤害 20% 转化为生命", lore: "月光被染成猩红，那是亡者的哀嚎。" }
   ];
 
   function applyBurn(e, dur, dps) {
@@ -904,6 +948,12 @@
     win()   { [523, 659, 784, 1046, 1318].forEach((f, i) => tone(f, 0.3, 0.18, "sine", 0, i * 0.12)); }
   };
 
+  function vibrate(pattern) {
+    if (isTouchDevice && navigator.vibrate) {
+      try { navigator.vibrate(pattern); } catch(e) {}
+    }
+  }
+
   muteBtn.addEventListener("click", () => {
     muted = !muted;
     muteBtn.textContent = muted ? "音效：关" : "音效：开";
@@ -1013,6 +1063,11 @@
     announcements.push({ text, color: color || "#ffffff", life: 2.4 });
   }
 
+  function addWhisper(text) {
+    whispers.push({ text, life: 4, maxLife: 4 });
+    if (whispers.length > 1) whispers.shift();
+  }
+
   let DPR = 1;
   function resize() {
     DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -1044,9 +1099,41 @@
     }
   });
   window.addEventListener("keyup", (e) => { keys[e.key.toLowerCase()] = false; });
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) lastTime = performance.now(); });
 
-  // ===== 摇杆 =====
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      if (running && !paused) {
+        paused = true;
+        saveMeta();
+        if (actx && actx.state === 'running') {
+          actx.suspend();
+        }
+      }
+    } else {
+      if (running && paused && upgradePanel.classList.contains("hidden") && eventPanel.classList.contains("hidden")) {
+        pauseScreen.classList.remove("hidden");
+      }
+      if (actx && actx.state === 'suspended' && !muted) {
+        actx.resume();
+      }
+    }
+  });
+
+  resumeBtn.addEventListener("click", () => {
+    pauseScreen.classList.add("hidden");
+    paused = false;
+    lastTime = performance.now();
+    if (actx && actx.state === 'suspended' && !muted) {
+      actx.resume();
+    }
+  });
+
+  pauseSaveBtn.addEventListener("click", () => {
+    saveCode.value = exportSave() || "（当前无存档）";
+    loadCode.value = "";
+    saveScreen.classList.remove("hidden");
+  });
+
   let joyActive = false, joyCenterX = 0, joyCenterY = 0, joyPointerId = null;
   function updateJoy(cx, cy) {
     const max = 40;
@@ -1068,6 +1155,7 @@
     joyCenterX = rect.left + rect.width / 2;
     joyCenterY = rect.top + rect.height / 2;
     joyActive = true; updateJoy(t.clientX, t.clientY);
+    if (tutorialState === 0) { tutorialState = 1; meta.playedTutorial = true; saveMeta(); }
   }, { passive: false });
   joystick.addEventListener("touchmove", (e) => {
     e.preventDefault(); if (!joyActive) return;
@@ -1083,7 +1171,6 @@
   joystick.addEventListener("touchend", endJoy, { passive: false });
   joystick.addEventListener("touchcancel", endJoy, { passive: false });
 
-  // ===== 冲刺按钮 =====
   function tryDash() {
     if (dash.cd > 0 || !running || paused) return;
     let dx = lastMoveX, dy = lastMoveY;
@@ -1097,13 +1184,13 @@
     burst(player.x, player.y, "#6ea0ff", 8, 200);
     sfx.dash();
     addShake(3);
+    vibrate(15);
   }
   dashBtn.addEventListener("pointerdown", (e) => {
     e.preventDefault();
     e.stopPropagation();
     tryDash();
   });
-  // 阻止长按选中/滚动
   dashBtn.addEventListener("contextmenu", (e) => e.preventDefault());
   dashWrap.addEventListener("touchstart", (e) => { if (e.target === dashWrap) e.preventDefault(); }, { passive: false });
 
@@ -1177,9 +1264,18 @@
           y: py + (t.e.y - py) * k + jitter
         });
       }
-      lightningChains.push({ pts, life: 0.2, maxLife: 0.2 });
+      // 羁绊：血怒（暴击+吸血），闪电变为血红色
+      const isBloodRage = stats.rage >= 2 && stats.blood >= 2;
+      const chainColor = isBloodRage ? "#ff3366" : "#ffd166";
+      lightningChains.push({ pts, life: 0.2, maxLife: 0.2, color: chainColor });
+      
       const d = Math.hypot(t.e.x - px, t.e.y - py) || 1;
       hitEnemy(t.e, baseDmg * 0.4, { x: (t.e.x - px) / d * 100, y: (t.e.y - py) / d * 100 }, { isChainHit: true });
+      
+      // 血怒吸血效果
+      if (isBloodRage) {
+        player.hp = Math.min(pMaxHp(), player.hp + baseDmg * 0.4 * 0.3);
+      }
       px = t.e.x; py = t.e.y;
     }
   }
@@ -1201,10 +1297,29 @@
           b.hitSet.add(e);
           hitEnemy(e, b.dmg, { x: b.vx * 0.12, y: b.vy * 0.12 }, { isChainHit: false });
           if (stats.whine >= 3) bladeMark(e);
+          
+          // 羁绊：烈焰风暴（炼狱 + 环绕），被点燃的敌人被飞刃击中会爆炸
+          if (weapons.inferno.owned && e.st.burnT > 0) {
+            fireExplosion(e);
+          }
         }
       }
       if (b.life <= 0) subBlades.splice(i, 1);
     }
+  }
+
+  function fireExplosion(e) {
+    if (e.exploded) return;
+    e.exploded = true;
+    pushRing({ x: e.x, y: e.y, r: e.r, maxR: 90, life: 0.4, color: "255,107,53" });
+    burst(e.x, e.y, "#ff6b35", 15, 200);
+    for (const t of enemies) {
+      if (t === e || t.hp <= 0) continue;
+      if (Math.hypot(t.x - e.x, t.y - e.y) < 90) {
+        hitEnemy(t, pDmg() * 0.8, { x: 0, y: 0 }, { isChainHit: true });
+      }
+    }
+    sfx.boom();
   }
 
   function updateBloodPools(dt) {
@@ -1240,50 +1355,115 @@
     }
   }
 
-  function spawnAltar() {
+  // ===== 随机事件系统 =====
+  function spawnRandomEvent() {
     const a = Math.random() * Math.PI * 2;
-    let x = player.x + Math.cos(a) * 130;
-    let y = player.y + Math.sin(a) * 130;
-    x = Math.max(40, Math.min(WORLD - 40, x));
-    y = Math.max(40, Math.min(WORLD - 40, y));
-    altar = { x, y, r: 22, activated: false, life: WAVE_REST + 1 };
+    let x = player.x + Math.cos(a) * 150;
+    let y = player.y + Math.sin(a) * 150;
+    x = Math.max(60, Math.min(WORLD - 60, x));
+    y = Math.max(60, Math.min(WORLD - 60, y));
+
+    const rand = Math.random();
+    let type = 'altar';
+    if (rand < 0.4) type = 'altar';
+    else if (rand < 0.7) type = 'chest';
+    else if (rand < 0.9) type = 'fountain';
+    else type = 'ambush';
+
+    if (type === 'ambush') {
+      ambushActive = true;
+      announce("深渊突袭！下一波敌人将陷入疯狂", "#ff3366");
+      addWhisper("它们从阴影中涌出，无穷无尽...");
+      return; // 突袭不生成物理实体
+    }
+
+    activeEvent = { type, x, y, r: 24, activated: false, life: WAVE_REST + 1 };
+    if (type === 'chest') addWhisper("那是前人留下的遗物。");
+    if (type === 'fountain') addWhisper("泉水中流淌的，是诱人的毒药。");
   }
 
-  function updateAltar(dt) {
-    if (!altar) return;
-    if (altar.activated) { altar.life -= dt; if (altar.life <= 0) altar = null; return; }
-    altar.life -= dt;
-    if (altar.life <= 0) { altar = null; return; }
-    if (altarOpening || !running || paused) return;
-    if (Math.hypot(player.x - altar.x, player.y - altar.y) < altar.r + player.r + 10) {
-      openAltar();
+  function updateEvent(dt) {
+    if (!activeEvent) return;
+    if (activeEvent.activated) { activeEvent.life -= dt; if (activeEvent.life <= 0) activeEvent = null; return; }
+    activeEvent.life -= dt;
+    if (activeEvent.life <= 0) { activeEvent = null; return; }
+    if (eventOpening || !running || paused) return;
+    if (Math.hypot(player.x - activeEvent.x, player.y - activeEvent.y) < activeEvent.r + player.r + 15) {
+      openEvent();
     }
   }
 
-  function openAltar() {
-    altarOpening = true;
+  function openEvent() {
+    eventOpening = true;
     paused = true;
-    altar.activated = true;
-    const pool = CURSES.slice();
-    const picks = [];
-    while (picks.length < 3 && pool.length) {
-      picks.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+    activeEvent.activated = true;
+
+    if (activeEvent.type === 'chest') {
+      // 宝箱直接开启，不弹面板
+      eventOpening = false;
+      paused = false;
+      lastTime = performance.now();
+      player.xp += 50;
+      runSouls += 50;
+      announce("获得宝藏！XP +50 · 魂 +50", "#ffd166");
+      burst(activeEvent.x, activeEvent.y, "#ffd166", 25, 250);
+      activeEvent = null;
+      sfx.win();
+      return;
     }
-    altarList.innerHTML = "";
-    picks.forEach((c) => {
-      const card = document.createElement("div");
-      card.className = "upgrade-card";
-      card.style.borderColor = c.color;
-      const h = document.createElement("h3"); h.textContent = c.name;
-      const p = document.createElement("p"); p.textContent = c.desc;
-      card.append(h, p);
-      card.addEventListener("click", () => chooseCurse(c));
-      altarList.appendChild(card);
-    });
-    altarCurseInfo.innerHTML = curse
-      ? '当前诅咒：<span style="color:' + curse.color + '">' + curse.name + '</span>（选择新诅咒将替换）'
-      : '当前无诅咒';
-    altarPanel.classList.remove("hidden");
+
+    if (activeEvent.type === 'fountain') {
+      eventTitle.textContent = "血祭之泉";
+      eventTitle.style.color = "#ff3366";
+      eventDesc.innerHTML = "以生命上限为代价，换取无上的力量。<br><span style='color:#9aa0b4'>消耗 25% 最大生命上限，回满血并随机获得一项强力属性。</span>";
+      eventList.innerHTML = "";
+      const btn = document.createElement("div");
+      btn.className = "upgrade-card";
+      btn.style.borderColor = "#ff3366";
+      btn.innerHTML = "<h3>饮下泉水</h3><p>失去 25% 最大生命上限，获得随机强化</p><div class='lore'>" + "灵魂被禁锢在肉体中，无法解脱。" + "</div>";
+      btn.addEventListener("click", () => {
+        const hpLoss = Math.floor(pMaxHp() * 0.25);
+        stats.hp -= Math.floor(hpLoss / 25); // 减少对应等级的hp
+        if (stats.hp < 0) stats.hp = 0;
+        player.hp = pMaxHp();
+        // 随机给一个属性
+        const pool = ['dmg', 'rate', 'crit', 'mov'];
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        stats[pick]++;
+        announce("血祭达成 · " + statDefs[pick].name, "#ff3366");
+        closeEventAndAdvance();
+      });
+      eventList.appendChild(btn);
+      eventPanel.classList.remove("hidden");
+      return;
+    }
+
+    if (activeEvent.type === 'altar') {
+      eventTitle.textContent = "深渊祭坛";
+      eventTitle.style.color = "#ff9f45";
+      if (tutorialState === 2) { tutorialState = 3; meta.playedTutorial = true; saveMeta(); }
+      const pool = CURSES.slice();
+      const picks = [];
+      while (picks.length < 3 && pool.length) {
+        picks.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+      }
+      eventList.innerHTML = "";
+      picks.forEach((c) => {
+        const card = document.createElement("div");
+        card.className = "upgrade-card";
+        card.style.borderColor = c.color;
+        const h = document.createElement("h3"); h.textContent = c.name;
+        const p = document.createElement("p"); p.textContent = c.desc;
+        const l = document.createElement("div"); l.className = "lore"; l.textContent = c.lore;
+        card.append(h, p, l);
+        card.addEventListener("click", () => chooseCurse(c));
+        eventList.appendChild(card);
+      });
+      eventDesc.innerHTML = curse
+        ? '当前诅咒：<span style="color:' + curse.color + '">' + curse.name + '</span>（选择新诅咒将替换）'
+        : '当前无诅咒';
+      eventPanel.classList.remove("hidden");
+    }
   }
 
   function applyCurse(c) {
@@ -1292,10 +1472,10 @@
     addShake(6); sfx.shield();
   }
 
-  function closeAltarAndAdvance() {
-    altarPanel.classList.add("hidden");
-    altar = null;
-    altarOpening = false;
+  function closeEventAndAdvance() {
+    eventPanel.classList.add("hidden");
+    activeEvent = null;
+    eventOpening = false;
     paused = false;
     lastTime = performance.now();
     inRest = false;
@@ -1306,9 +1486,9 @@
 
   function chooseCurse(c) {
     applyCurse(c);
-    closeAltarAndAdvance();
+    closeEventAndAdvance();
   }
-  altarSkipBtn.addEventListener("click", () => { closeAltarAndAdvance(); });
+  eventSkipBtn.addEventListener("click", () => { closeEventAndAdvance(); });
 
   function generateDecor() {
     decor = [];
@@ -1339,9 +1519,9 @@
     runSouls = 0; runReviveUsed = false; runHurt = false;
     player.level = 1; player.xp = 0; player.xpNeed = 10;
     bullets = []; enemies = []; drops = []; floats = []; rings = []; missiles = [];
-    particles = []; sparks = []; telegraphs = []; announcements = []; ebullets = [];
+    particles = []; sparks = []; telegraphs = []; announcements = []; ebullets = []; whispers = [];
     afterimages = []; lightningChains = []; subBlades = []; bloodPools = [];
-    curse = null; altar = null; altarOpening = false;
+    curse = null; activeEvent = null; eventOpening = false; ambushActive = false;
     evolutionFx = 0; evolutionColor = null;
     dash.t = 0; dash.cd = 0; dashBuffT = 0;
     lastMoveX = 0; lastMoveY = 0;
@@ -1353,6 +1533,7 @@
     waveIndex = 1; waveTimer = WAVE_DURATION; restTimer = 0; inRest = false;
     boss = null; bossSpawned = false; endless = false; bossKills = 0;
     lastDashDisplay = -2;
+    tutorialState = meta.playedTutorial ? 3 : 0;
   }
 
   function startGame() {
@@ -1362,9 +1543,14 @@
     deathScreen.classList.add("hidden");
     victoryScreen.classList.add("hidden");
     upgradePanel.classList.add("hidden");
-    altarPanel.classList.add("hidden");
+    eventPanel.classList.add("hidden");
+    pauseScreen.classList.add("hidden");
     running = true; lastTime = performance.now();
+    
+    // 叙事：进入关卡
     announce(curStage.name + " · 第 1 波", "#8ec5ff");
+    addWhisper(curStage.lore[0]);
+    
     requestAnimationFrame(loop);
   }
 
@@ -1378,7 +1564,8 @@
     boss = null; bossSpawned = false;
     victoryScreen.classList.add("hidden");
     running = true; paused = false; lastTime = performance.now();
-    announce("无尽模式开启 · 被击败的首领将不断再临", "#ffd166");
+    announce("无尽轮回开启 · 被击败的首领将不断再临", "#ffd166");
+    addWhisper("死亡拒绝了你。");
     requestAnimationFrame(loop);
   }
   document.getElementById("vEndlessBtn").addEventListener("click", continueEndless);
@@ -1590,7 +1777,6 @@
   document.getElementById("achBtn").addEventListener("click", () => { renderAch(); achScreen.classList.remove("hidden"); });
   document.getElementById("achCloseBtn").addEventListener("click", () => achScreen.classList.add("hidden"));
 
-  // ===== 存档导出 / 导入 =====
   const saveScreen = document.getElementById("saveScreen");
   const saveCode = document.getElementById("saveCode");
   const loadCode = document.getElementById("loadCode");
@@ -1706,9 +1892,10 @@
   function gameOver() {
     running = false; paused = true;
     addShake(16); addHitstop(0.5, 0.15); sfx.death();
+    vibrate([100, 50, 100]);
     burst(player.x, player.y, "#4f6ef7", 26, 260);
     document.getElementById("deathSub").textContent =
-      curStage.name + " · " + (bossSpawned ? "倒在首领面前，差一点就够了。" : "活得越久，下一局越有希望。");
+      curStage.name + " · " + (bossSpawned ? "倒在首领面前，未了之事仍在继续。" : "但未了之事，不允许你安息。");
     if (elapsed > meta.best) { meta.best = Math.floor(elapsed); saveMeta(); }
     runSouls = Math.round(runSouls * curStage.soulMult * dailySoulMult());
     const dailyBonus = grantDaily(false);
@@ -1723,6 +1910,7 @@
   function winGame() {
     running = false; paused = true;
     addShake(20); addHitstop(0.8, 0.12); sfx.win();
+    vibrate([200, 100, 200]);
     burst(boss.x, boss.y, "#ff4d6a", 40, 320);
     if (elapsed > meta.best) { meta.best = Math.floor(elapsed); saveMeta(); }
 
@@ -1747,7 +1935,7 @@
     if (!runHurt) achSet("flawless");
     fillStats("vStat");
 
-    document.getElementById("victorySub").textContent = curStage.name + " · 首领已被击败，未了之事终于了结。";
+    document.getElementById("victorySub").textContent = curStage.name + " · 首领已被击败，执念已散。";
     let soulMsg = "本局获得魂 +" + runSouls;
     if (dailyBonus) soulMsg += " · 每日奖励 +" + dailyBonus;
     if (stageBonus) soulMsg += " · 首通奖励 +" + stageBonus;
@@ -1767,13 +1955,15 @@
       nextBtn.style.display = "none";
     }
 
-    setTimeout(() => { victoryScreen.classList.remove("hidden"); }, 700);
+    setTimeout(() => { victoryScreen.style.display = "flex"; victoryScreen.classList.remove("hidden"); }, 700);
   }
 
   const enemyBase = {
     normal: { r: 10, speed: 70, hp: 22, color: "#ff6b81", dmg: 8 },
     fast:   { r: 8,  speed: 110, hp: 14, color: "#ffd166", dmg: 6 },
-    tank:   { r: 16, speed: 45, hp: 60, color: "#b45cff", dmg: 12 }
+    tank:   { r: 16, speed: 45, hp: 60, color: "#b45cff", dmg: 12 },
+    mage:   { r: 12, speed: 55, hp: 35, color: "#50e3c2", dmg: 10 },
+    bomber: { r: 11, speed: 140, hp: 20, color: "#ff3366", dmg: 25 }
   };
 
   const eliteBase = {
@@ -1813,7 +2003,7 @@
       color: base.color, dmg: Math.round(base.dmg * dscale * edmg),
       cd: 0, kx: 0, ky: 0, flash: 0, dmgAccum: 0, dmgTimer: 0, critFlag: false,
       shield: 0, maxShield: 0, summonT: 0, chargeState: 0, chargeT: 0, cvx: 0, cvy: 0,
-      phase: 0, atkT: 0, hitPlayerOnce: false,
+      phase: 0, atkT: 0, hitPlayerOnce: false, exploded: false,
       st: { burnT: 0, burnDps: 0, slowT: 0, slowMult: 1, stunT: 0 }
     };
   }
@@ -1823,14 +2013,29 @@
     const w = s.weights;
     const canFast = elapsed >= s.gates.fast;
     const canTank = elapsed >= s.gates.tank;
-    const nw = w.normal;
-    const fw = canFast ? w.fast : 0;
-    const tw = canTank ? w.tank : 0;
-    const sum = nw + fw + tw || 1;
+    const canMage = elapsed >= (s.gates.mage || 999);
+    const canBomber = elapsed >= (s.gates.bomber || 999);
+
+    let nw = w.normal || 0;
+    let fw = canFast ? (w.fast || 0) : 0;
+    let tw = canTank ? (w.tank || 0) : 0;
+    let mw = canMage ? (w.mage || 0) : 0;
+    let bw = canBomber ? (w.bomber || 0) : 0;
+
+    if (ambushActive) {
+      // 深渊突袭：大幅增加自爆兵和快速怪概率
+      fw *= 3; bw *= 5; nw *= 0.2; tw = 0; mw = 0;
+    }
+
+    const sum = nw + fw + tw + mw + bw || 1;
     const r = Math.random() * sum;
-    if (r < tw) return "tank";
-    if (r < tw + fw) return "fast";
-    return "normal";
+
+    let current = 0;
+    if (r < (current += nw)) return "normal";
+    if (r < (current += fw)) return "fast";
+    if (r < (current += tw)) return "tank";
+    if (r < (current += mw)) return "mage";
+    return "bomber";
   }
 
   function spawnEnemy() {
@@ -1890,7 +2095,14 @@
     e.phase = 1; e.atkT = 2.5;
     boss = e; bossSpawned = true;
     enemies.push(e);
-    announce(bossKills === 0 ? "首领 · 未了之事" : "首领再临 · 第 " + (bossKills + 1) + " 度", "#ff4d6a");
+    
+    if (bossKills === 0) {
+      announce("首领 · 未了之事", "#ff4d6a");
+      addWhisper("昔日的守望者，如今的守墓人。");
+    } else {
+      announce("首领再临 · 第 " + (bossKills + 1) + " 度", "#ff4d6a");
+      addWhisper("死亡对你毫无意义，对吗？");
+    }
     addShake(14); sfx.boss();
   }
 
@@ -1951,6 +2163,8 @@
     if (crit) addSpark(e.x, e.y, "#ffd166", true);
     else if (Math.random() < 0.6) addSpark(e.x, e.y, "#ffffff", false);
     if (crit) sfx.crit(); else sfx.hit();
+    
+    return crit; // 返回是否暴击，供羁绊使用
   }
 
   function killEnemy(e, i) {
@@ -1958,9 +2172,9 @@
     const isElite = e.kind === "elite";
     kills++;
     const soulMult = (1 + 0.15 * meta.t.greed) * (1 + (curseP().soul || 0));
-    runSouls += Math.round((isBoss ? 220 : isElite ? 26 : e.kind === "tank" ? 4 : 2) * soulMult);
+    runSouls += Math.round((isBoss ? 220 : isElite ? 26 : e.kind === "tank" ? 4 : e.kind === "mage" ? 5 : e.kind === "bomber" ? 3 : 2) * soulMult);
     if (drops.length < MAX_DROPS) {
-      drops.push({ x: e.x, y: e.y, r: 5, xp: isBoss ? 60 : isElite ? 14 : e.kind === "tank" ? 5 : 2, life: 20 });
+      drops.push({ x: e.x, y: e.y, r: 5, xp: isBoss ? 60 : isElite ? 14 : e.kind === "tank" ? 5 : e.kind === "mage" ? 6 : e.kind === "bomber" ? 4 : 2, life: 20 });
     }
     burst(e.x, e.y, e.color, isBoss ? 34 : isElite ? 18 : e.kind === "tank" ? 14 : 8, isBoss ? 300 : 170);
     sfx.kill();
@@ -1984,6 +2198,7 @@
         addShake(18); addHitstop(0.6, 0.12); sfx.win();
         burst(e.x, e.y, "#ff4d6a", 40, 320);
         announce("无尽模式 · 首领再临被击杀！继续坚持", "#ffd166");
+        addWhisper("你的执念，我收下了。");
         enemies.splice(i, 1);
         return;
       }
@@ -2002,11 +2217,14 @@
     player.invuln = 0.6; player.flash = 0.18;
     addFloat(player.x, player.y - 18, "-" + taken, "#ff4d6a");
     addShake(9); addHitstop(0.12, 0.15); sfx.hurt();
+    vibrate(30);
     if (player.hp <= 0) {
       if (meta.t.revive >= 1 && !runReviveUsed) {
         runReviveUsed = true; player.hp = pMaxHp(); player.invuln = 2.5; player.flash = 0.3;
         burst(player.x, player.y, "#b388ff", 30, 280); addShake(12);
-        announce("不灭之魂 · 复活！", "#b388ff"); sfx.win(); return;
+        announce("不灭之魂 · 复活！", "#b388ff"); 
+        addWhisper("死亡拒绝了你。");
+        sfx.win(); return;
       }
       player.hp = 0; gameOver();
     }
@@ -2138,16 +2356,34 @@
         const dx = e.x - bx, dy = e.y - by;
         if (Math.hypot(dx, dy) < e.r + 11) {
           const d = Math.hypot(dx, dy) || 1;
-          hitEnemy(e, dmg, { x: (dx / d) * 90, y: (dy / d) * 90 });
+          const isCrit = hitEnemy(e, dmg, { x: (dx / d) * 90, y: (dy / d) * 90 });
           e.cd = 0.35; sfx.orbit();
-          if (stats.whine > 0) {
-            bladeMark(e);
+          
+          // 羁绊：刃暴（环绕+暴击），暴击时立即弹射一枚小飞刃
+          if (stats.whine >= 2 && stats.crit >= 2 && isCrit) {
             const ang = Math.atan2(e.y - player.y, e.x - player.x);
             subBlades.push({
               x: player.x, y: player.y,
               vx: Math.cos(ang) * 520, vy: Math.sin(ang) * 520,
               life: 0.4, dmg: pDmg() * 0.45, hitSet: new Set()
             });
+          }
+
+          if (stats.whine > 0) {
+            bladeMark(e);
+            if (stats.whine >= 3) {
+              const ang = Math.atan2(e.y - player.y, e.x - player.x);
+              subBlades.push({
+                x: player.x, y: player.y,
+                vx: Math.cos(ang) * 520, vy: Math.sin(ang) * 520,
+                life: 0.4, dmg: pDmg() * 0.45, hitSet: new Set()
+              });
+            }
+          }
+
+          // 羁绊：烈焰风暴
+          if (weapons.inferno.owned && e.st.burnT > 0) {
+            fireExplosion(e);
           }
         }
       }
@@ -2224,7 +2460,9 @@
       if (d < 220) { e.kx += (dx / d) * 200; e.ky += (dy / d) * 200; }
     }
     addShake(18); addHitstop(0.5, 0.15); sfx.phase();
+    vibrate([50, 50, 50]);
     announce("首领进入第 " + p + " 阶段", "#ff4d6a");
+    addWhisper("你在恐惧？还是想起了什么？");
   }
 
   function bossRingShot(b) {
@@ -2308,6 +2546,67 @@
         }
       }
     }
+    
+    if (e.kind === "mage") {
+      const dx = player.x - e.x, dy = player.y - e.y;
+      const d = Math.hypot(dx, dy) || 1;
+      const nx = dx / d, ny = dy / d;
+      
+      if (d < 220) {
+        e.x -= nx * e.speed * 1.5 * dt;
+        e.y -= ny * e.speed * 1.5 * dt;
+      } else if (d > 380) {
+        e.x += nx * e.speed * dt;
+        e.y += ny * e.speed * dt;
+      } else {
+        e.x += -ny * e.speed * 0.5 * dt;
+        e.y += nx * e.speed * 0.5 * dt;
+      }
+
+      e.cd -= dt;
+      if (e.cd <= 0) {
+        e.cd = 2.5;
+        if (ebullets.length < MAX_EBULLETS) {
+          ebullets.push({
+            x: e.x, y: e.y,
+            vx: nx * 220, vy: ny * 220,
+            life: 3, dmg: e.dmg, size: 7
+          });
+          sfx.shoot();
+          addSpark(e.x, e.y, "#50e3c2", false);
+        }
+      }
+    }
+
+    if (e.kind === "bomber") {
+      if (e.chargeState === 0) {
+        const d = Math.hypot(player.x - e.x, player.y - e.y);
+        if (d < 65) {
+          e.chargeState = 1;
+          e.chargeT = 0.6;
+        }
+      } else if (e.chargeState === 1) {
+        e.chargeT -= dt;
+        e.flash = 0.1;
+        if (e.chargeT <= 0) {
+          pushRing({ x: e.x, y: e.y, r: 10, maxR: 100, life: 0.4, color: "255,51,102" });
+          burst(e.x, e.y, "#ff3366", 20, 200);
+          addShake(12); sfx.boom();
+          
+          if (Math.hypot(player.x - e.x, player.y - e.y) < 100) {
+            damagePlayer(e.dmg);
+          }
+          for (const other of enemies) {
+            if (other === e || other.hp <= 0) continue;
+            if (Math.hypot(other.x - e.x, other.y - e.y) < 100) {
+              hitEnemy(other, 100, { x: 0, y: 0 }, { isChainHit: true });
+            }
+          }
+          e.hp = 0;
+        }
+      }
+    }
+
     if (e.kind === "boss") {
       const p = bossPhaseOf(e);
       if (p !== e.phase) onBossPhase(e, p);
@@ -2376,18 +2675,23 @@
       e.cd = Math.max(0, e.cd - dt);
       e.flash = Math.max(0, e.flash - dt);
 
-      e.x += e.kx * dt; e.y += e.ky * dt;
-      const decay = Math.pow(0.02, dt);
-      e.kx *= decay; e.ky *= decay;
+      const isBomberArmed = e.kind === "bomber" && e.chargeState === 1;
 
-      const dx = player.x - e.x, dy = player.y - e.y;
-      const d = Math.hypot(dx, dy) || 1;
-      const stunned = e.st.stunT > 0;
-      if (!stunned && !(e.kind === "elite" && e.ability === "charge" && e.chargeState === 2) &&
-          !(e.kind === "boss" && e.chargeState === 2)) {
-        const sm = e.st.slowMult;
-        e.x += (dx / d) * e.speed * sm * dt;
-        e.y += (dy / d) * e.speed * sm * dt;
+      if (!isBomberArmed) {
+        e.x += e.kx * dt; e.y += e.ky * dt;
+        const decay = Math.pow(0.02, dt);
+        e.kx *= decay; e.ky *= decay;
+
+        const dx = player.x - e.x, dy = player.y - e.y;
+        const d = Math.hypot(dx, dy) || 1;
+        const stunned = e.st.stunT > 0;
+        
+        if (e.kind !== "mage" && !stunned && !(e.kind === "elite" && e.ability === "charge" && e.chargeState === 2) &&
+            !(e.kind === "boss" && e.chargeState === 2)) {
+          const sm = e.st.slowMult;
+          e.x += (dx / d) * e.speed * sm * dt;
+          e.y += (dy / d) * e.speed * sm * dt;
+        }
       }
 
       updateEnemySpecial(e, dt);
@@ -2400,7 +2704,7 @@
 
       if (e.hp <= 0) { killEnemy(e, i); if (!running) return; continue; }
 
-      if (d < e.r + player.r && player.invuln <= 0) {
+      if (e.kind !== "bomber" && Math.hypot(player.x - e.x, player.y - e.y) < e.r + player.r && player.invuln <= 0) {
         damagePlayer(e.dmg);
         if (!running) return;
       }
@@ -2482,6 +2786,10 @@
       announcements[i].life -= dt;
       if (announcements[i].life <= 0) announcements.splice(i, 1);
     }
+    for (let i = whispers.length - 1; i >= 0; i--) {
+      whispers[i].life -= dt;
+      if (whispers[i].life <= 0) whispers.splice(i, 1);
+    }
   }
 
   function startWave() {
@@ -2490,6 +2798,11 @@
     if (dailyCfg && dailyCfg.special.doubleElite) { count = Math.max(count, 1) * 2; }
     for (let i = 0; i < count; i++) {
       spawnElite();
+    }
+    // 周期性叙事
+    if (waveIndex % 2 === 1) {
+      const loreIdx = Math.min(curStage.lore.length - 1, Math.floor(waveIndex / 2));
+      addWhisper(curStage.lore[loreIdx]);
     }
   }
 
@@ -2503,7 +2816,8 @@
       if (restTimer <= 0) {
         inRest = false; waveIndex++;
         waveTimer = WAVE_DURATION;
-        altar = null;
+        activeEvent = null;
+        ambushActive = false;
         startWave();
       }
       return;
@@ -2514,7 +2828,8 @@
       inRest = true; restTimer = WAVE_REST;
       enemies = enemies.filter((e) => e.kind !== "normal" || Math.random() < 0.35);
       announce("第 " + waveIndex + " 波结束 · 喘息 " + WAVE_REST + " 秒", "#5cf2a8");
-      spawnAltar();
+      spawnRandomEvent();
+      if (tutorialState === 1 && meta.playedTutorial) tutorialState = 2;
     }
   }
 
@@ -2586,8 +2901,12 @@
 
     announce("武器进化 · " + r.name, r.color);
     addShake(14); sfx.evolve();
+    vibrate([100, 50, 100, 50, 200]);
     burst(player.x, player.y, r.color, 46, 340);
     pushRing({ x: player.x, y: player.y, r: player.r, maxR: 260, life: 0.9, color: hexToRgbTriplet(r.color) });
+    
+    // 羁绊播报检查
+    if (r.id === 'tempest' && stats.rage > 0) announce("羁绊激活 · 刃暴", "#ffd166");
   }
 
   function updateRerollBtn() {
@@ -2615,6 +2934,7 @@
   function showEvolution(r) {
     paused = true; zoomTarget = 1;
     upgradeActions.style.display = "none";
+    upgradeTutorial.classList.add("hidden");
     upgradePanel.classList.remove("hidden");
     upgradeList.innerHTML = "";
     const card = document.createElement("div");
@@ -2624,7 +2944,8 @@
     const lv = document.createElement("div"); lv.className = "lv";
     lv.textContent = "消耗：" + Object.keys(r.from).map((w) => weaponDefs[w].name + " Lv." + r.from[w]).join(" + ");
     const p = document.createElement("p"); p.textContent = r.desc;
-    card.append(h, lv, p);
+    const l = document.createElement("div"); l.className = "lore"; l.textContent = r.lore || "";
+    card.append(h, lv, p, l);
     card.addEventListener("click", () => {
       doEvolve(r);
       upgradePanel.classList.add("hidden");
@@ -2638,6 +2959,13 @@
     upgradeActions.style.display = "flex";
     upgradePanel.classList.remove("hidden");
     upgradeList.innerHTML = "";
+    
+    if (tutorialState === 1 && !meta.playedTutorial) {
+      upgradeTutorial.classList.remove("hidden");
+    } else {
+      upgradeTutorial.classList.add("hidden");
+    }
+
     pickThree().forEach((c) => {
       const card = document.createElement("div");
       card.className = "upgrade-card";
@@ -2662,6 +2990,7 @@
       card.append(h, lv, p);
       card.addEventListener("click", () => {
         applyChoice(c);
+        if (tutorialState === 1) { tutorialState = 2; meta.playedTutorial = true; saveMeta(); }
         const evo = findEvolution();
         upgradePanel.classList.add("hidden");
         if (evo) { showEvolution(evo); return; }
@@ -2700,6 +3029,7 @@
     if (ix || iy) {
       player.angle = Math.atan2(iy, ix);
       lastMoveX = ix; lastMoveY = iy;
+      if (tutorialState === 0) { tutorialState = 1; meta.playedTutorial = true; saveMeta(); }
     }
 
     player.x += ix * pSpeed() * dt;
@@ -2732,7 +3062,7 @@
     updateParticles(dt);
     updateRings(dt);
     updateAnnouncements(dt);
-    updateAltar(dt);
+    updateEvent(dt);
 
     if (!inRest && !bossSpawned) {
       spawnTimer -= dt;
@@ -2764,10 +3094,15 @@
       ? `首领 · 第 ${boss.phase} 阶段`
       : `${curStage.name} · 第 ${waveIndex} 波` + (inRest ? " · 喘息" : "");
     killText.textContent = "击杀 " + kills;
+    
+    // HUD 武器图标化
     weaponText.innerHTML = Object.keys(weaponDefs)
       .filter((id) => weapons[id].owned)
-      .map((id) => '<span style="color:' + (WEAPON_COLORS[id] || "#c8cde0") + '">' + weaponDefs[id].name + " " + weapons[id].level + '</span>')
-      .join(' · ');
+      .map((id) => {
+        const col = WEAPON_COLORS[id] || "#c8cde0";
+        const short = WEAPON_SHORT[id] || "?";
+        return `<span class="w-tag" style="color:${col}; border-color:${hexToRgba(col, 0.4)}">${short}${weapons[id].level}</span>`;
+      }).join('');
   }
 
   function drawEnemyShape(e, sc) {
@@ -2798,6 +3133,36 @@
       }
       ctx.closePath();
       ctx.fill();
+    } else if (kind === "mage") {
+      ctx.rotate(Math.atan2(player.y - e.y, player.x - e.x));
+      ctx.fillStyle = e.color;
+      ctx.beginPath();
+      ctx.moveTo(r * 1.2, 0);
+      ctx.lineTo(0, r * 0.9);
+      ctx.lineTo(-r * 1.2, 0);
+      ctx.lineTo(0, -r * 0.9);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = "#000";
+      ctx.beginPath(); ctx.arc(r * 0.4, 0, r * 0.25, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#fff";
+      ctx.beginPath(); ctx.arc(r * 0.45, 0, r * 0.1, 0, Math.PI * 2); ctx.fill();
+    } else if (kind === "bomber") {
+      ctx.fillStyle = e.color;
+      ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.5, -r * 0.3);
+      ctx.lineTo(0, 0);
+      ctx.lineTo(r * 0.4, -r * 0.6);
+      ctx.moveTo(0, 0);
+      ctx.lineTo(-r * 0.2, r * 0.7);
+      ctx.stroke();
+      if (e.chargeState === 1) {
+        ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(Math.sin(elapsed*30)) * 0.8})`;
+        ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+      }
     } else if (kind === "elite") {
       if (ability === "charge") {
         const ang = Math.atan2(player.y - e.y, player.x - e.x);
@@ -3005,7 +3370,6 @@
   }
 
   function drawDashHud() {
-    // 移动端使用 DOM 冲刺按钮，避免与按钮重叠
     if (isTouchDevice) return;
     const r = 28, cx = W - 50, cy = H - 50;
     const ready = dash.cd <= 0;
@@ -3091,6 +3455,54 @@
     ctx.restore();
   }
 
+  function drawTutorial() {
+    if (!running || paused) return;
+    if (tutorialState === 0) {
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+      ctx.font = "bold 18px system-ui";
+      ctx.fillText(isTouchDevice ? "拖动左侧摇杆移动" : "WASD / 方向键移动", W / 2, H / 2 + 80);
+      if (isTouchDevice) {
+        ctx.beginPath();
+        ctx.arc(W / 2, H / 2 + 140, 40, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,255,0.1)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.3)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+    
+    if (tutorialState === 2 && activeEvent) {
+      const dx = activeEvent.x - player.x;
+      const dy = activeEvent.y - player.y;
+      const dist = Math.hypot(dx, dy);
+      
+      if (dist > 150) {
+        ctx.save();
+        ctx.translate(W / 2, H / 2);
+        ctx.rotate(Math.atan2(dy, dx));
+        ctx.fillStyle = "rgba(255, 209, 102, 0.8)";
+        ctx.beginPath();
+        ctx.moveTo(100, 0);
+        ctx.lineTo(80, 10);
+        ctx.lineTo(80, -10);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+        
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#ffd166";
+        ctx.font = "bold 16px system-ui";
+        ctx.fillText("靠近未知事件", W / 2, H / 2 + 80);
+        ctx.restore();
+      }
+    }
+  }
+
   function draw() {
     ctx.fillStyle = "#11141f";
     ctx.fillRect(0, 0, W, H);
@@ -3145,32 +3557,69 @@
 
     drawDecor(camX, camY);
 
-    if (altar) {
+    // 绘制事件实体
+    if (activeEvent) {
       ctx.save();
-      ctx.translate(altar.x, altar.y);
-      const gg = ctx.createRadialGradient(0, 0, 0, 0, 0, altar.r * 2.5);
-      gg.addColorStop(0, "rgba(255,159,69,0.35)");
-      gg.addColorStop(1, "rgba(255,159,69,0)");
-      ctx.fillStyle = gg;
-      ctx.beginPath(); ctx.arc(0, 0, altar.r * 2.5, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = "#8b5a2b";
-      ctx.beginPath(); ctx.arc(0, 0, altar.r, 0, Math.PI * 2); ctx.fill();
-      ctx.save();
-      ctx.rotate(elapsed * 2);
-      ctx.strokeStyle = "#ffd166";
-      ctx.lineWidth = 2;
-      for (let i = 0; i < 3; i++) {
-        const a0 = i / 3 * Math.PI * 2;
-        ctx.beginPath(); ctx.arc(0, 0, altar.r + 8, a0, a0 + 0.6); ctx.stroke();
+      ctx.translate(activeEvent.x, activeEvent.y);
+      
+      if (activeEvent.type === 'altar') {
+        const gg = ctx.createRadialGradient(0, 0, 0, 0, 0, activeEvent.r * 2.5);
+        gg.addColorStop(0, "rgba(255,159,69,0.35)");
+        gg.addColorStop(1, "rgba(255,159,69,0)");
+        ctx.fillStyle = gg;
+        ctx.beginPath(); ctx.arc(0, 0, activeEvent.r * 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#8b5a2b";
+        ctx.beginPath(); ctx.arc(0, 0, activeEvent.r, 0, Math.PI * 2); ctx.fill();
+        ctx.save();
+        ctx.rotate(elapsed * 2);
+        ctx.strokeStyle = "#ffd166";
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 3; i++) {
+          const a0 = i / 3 * Math.PI * 2;
+          ctx.beginPath(); ctx.arc(0, 0, activeEvent.r + 8, a0, a0 + 0.6); ctx.stroke();
+        }
+        ctx.restore();
+        ctx.fillStyle = "#ffd166";
+        ctx.beginPath(); ctx.arc(0, 0, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#ffd166";
+        ctx.font = "bold 12px system-ui";
+        ctx.textAlign = "center";
+        ctx.fillText("深渊祭坛", 0, -activeEvent.r - 16);
+      } 
+      else if (activeEvent.type === 'chest') {
+        const gg = ctx.createRadialGradient(0, 0, 0, 0, 0, activeEvent.r * 2.5);
+        gg.addColorStop(0, "rgba(255,209,102,0.35)");
+        gg.addColorStop(1, "rgba(255,209,102,0)");
+        ctx.fillStyle = gg;
+        ctx.beginPath(); ctx.arc(0, 0, activeEvent.r * 2.5, 0, Math.PI * 2); ctx.fill();
+        // 宝箱形状
+        ctx.fillStyle = "#5c3a21";
+        ctx.fillRect(-15, -10, 30, 20);
+        ctx.fillStyle = "#ffd166";
+        ctx.fillRect(-15, -10, 30, 5);
+        ctx.fillRect(-2, -5, 4, 15);
+        ctx.fillStyle = "#ffd166";
+        ctx.font = "bold 12px system-ui";
+        ctx.textAlign = "center";
+        ctx.fillText("遗物宝箱", 0, -activeEvent.r - 16);
+      }
+      else if (activeEvent.type === 'fountain') {
+        const gg = ctx.createRadialGradient(0, 0, 0, 0, 0, activeEvent.r * 2.5);
+        gg.addColorStop(0, "rgba(255,51,102,0.35)");
+        gg.addColorStop(1, "rgba(255,51,102,0)");
+        ctx.fillStyle = gg;
+        ctx.beginPath(); ctx.arc(0, 0, activeEvent.r * 2.5, 0, Math.PI * 2); ctx.fill();
+        // 泉水形状
+        ctx.fillStyle = "#ff3366";
+        ctx.beginPath(); ctx.arc(0, 0, activeEvent.r, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#fff";
+        ctx.beginPath(); ctx.arc(0, 0, activeEvent.r * 0.4, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#ff3366";
+        ctx.font = "bold 12px system-ui";
+        ctx.textAlign = "center";
+        ctx.fillText("血祭之泉", 0, -activeEvent.r - 16);
       }
       ctx.restore();
-      ctx.fillStyle = "#ffd166";
-      ctx.beginPath(); ctx.arc(0, 0, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.restore();
-      ctx.fillStyle = "#ffd166";
-      ctx.font = "bold 12px system-ui";
-      ctx.textAlign = "center";
-      ctx.fillText("靠近领取诅咒", altar.x, altar.y - altar.r - 16);
     }
 
     for (const t of telegraphs) {
@@ -3239,8 +3688,8 @@
     }
 
     for (const b of ebullets) {
-      drawGlow(b.x, b.y, b.size + 4, "#ff4d6a");
-      ctx.fillStyle = "#ff8a9a";
+      drawGlow(b.x, b.y, b.size + 4, "#50e3c2");
+      ctx.fillStyle = "#50e3c2";
       ctx.beginPath(); ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2); ctx.fill();
     }
 
@@ -3311,7 +3760,7 @@
           ctx.fill();
         }
       }
-      if (e.hp < e.maxHp && e.kind !== "boss") {
+      if (e.hp < e.maxHp && e.kind !== "boss" && e.kind !== "bomber") {
         ctx.fillStyle = "rgba(0,0,0,0.5)";
         ctx.fillRect(e.x - e.r, e.y - e.r - 8, e.r * 2, 4);
         ctx.fillStyle = "#ff4d6a";
@@ -3322,9 +3771,9 @@
     for (const l of lightningChains) {
       const k = Math.max(0, l.life / l.maxLife);
       ctx.globalAlpha = k;
-      ctx.strokeStyle = "#ffd166";
+      ctx.strokeStyle = l.color || "#ffd166";
       ctx.lineWidth = 3;
-      ctx.shadowColor = "#ffd166";
+      ctx.shadowColor = l.color || "#ffd166";
       ctx.shadowBlur = 10;
       ctx.beginPath();
       for (let i = 0; i < l.pts.length; i++) {
@@ -3427,6 +3876,16 @@
     }
     ctx.globalAlpha = 1;
 
+    // 叙事低语（飘字）
+    for (const w of whispers) {
+      const k = Math.min(1, w.life / 0.8) * Math.min(1, (w.maxLife - w.life) / 0.5);
+      ctx.globalAlpha = k * 0.8;
+      ctx.fillStyle = "#8b90a8";
+      ctx.font = "italic 14px system-ui";
+      ctx.fillText(w.text, W / 2, H - 100);
+    }
+    ctx.globalAlpha = 1;
+
     if (boss && boss.hp > 0) {
       ctx.fillStyle = "rgba(255,40,80,0.05)";
       ctx.fillRect(0, 0, W, H);
@@ -3464,6 +3923,7 @@
 
     drawEvolutionFlash();
     drawDashHud();
+    drawTutorial();
   }
 
   function showFatal(err) {
@@ -3547,7 +4007,7 @@
       curStage: curStage.name, WORLD,
       evolutionFx,
       primaryWeapon: primaryWeapon(),
-      isTouch: isTouchDevice, lowEnd
+      isTouch: isTouchDevice, lowEnd, tutorialState, ambushActive
     }; }
   };
 
