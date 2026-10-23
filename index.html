@@ -62,7 +62,8 @@
   .hud-text { font-size: 13px; color: #c8cde0; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
   .bar-wrap { width: 180px; height: 8px; background: #1b1f30; border-radius: 999px; overflow: hidden; margin-top: 4px; }
   .hp-bar { height: 100%; background: #ff4d6a; width: 100%; transition: width .12s; }
-  .xp-bar { height: 100%; background: #5cf2a8; width: 0%; transition: width .12s; }
+  /* 经验条改为冰蓝色 */
+  .xp-bar { height: 100%; background: #8ec5ff; width: 0%; transition: width .12s; }
   
   #weaponText { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; max-width: 200px; margin-top: 4px;}
   .w-tag {
@@ -2172,8 +2173,20 @@
     kills++;
     const soulMult = (1 + 0.15 * meta.t.greed) * (1 + (curseP().soul || 0));
     runSouls += Math.round((isBoss ? 220 : isElite ? 26 : e.kind === "tank" ? 4 : e.kind === "mage" ? 5 : e.kind === "bomber" ? 3 : 2) * soulMult);
+    
+    // 经验掉落颜色分级
+    let dropColor = "#8ec5ff";
+    let dropR = 5;
+    if (isBoss) { dropColor = "#ffd166"; dropR = 10; }
+    else if (isElite || e.kind === "tank") { dropColor = "#c084fc"; dropR = 7; }
+
     if (drops.length < MAX_DROPS) {
-      drops.push({ x: e.x, y: e.y, r: 5, xp: isBoss ? 60 : isElite ? 14 : e.kind === "tank" ? 5 : e.kind === "mage" ? 6 : e.kind === "bomber" ? 4 : 2, life: 20 });
+      drops.push({ 
+        x: e.x, y: e.y, r: dropR, 
+        xp: isBoss ? 60 : isElite ? 14 : e.kind === "tank" ? 5 : e.kind === "mage" ? 6 : e.kind === "bomber" ? 4 : 2, 
+        life: 20,
+        color: dropColor
+      });
     }
     burst(e.x, e.y, e.color, isBoss ? 34 : isElite ? 18 : e.kind === "tank" ? 14 : 8, isBoss ? 300 : 170);
     sfx.kill();
@@ -2467,7 +2480,8 @@
     for (let i = 0; i < n; i++) {
       if (ebullets.length >= MAX_EBULLETS) break;
       const a = (i / n) * Math.PI * 2 + Math.random() * 0.15;
-      ebullets.push({ x: b.x, y: b.y, vx: Math.cos(a) * 230, vy: Math.sin(a) * 230, life: 3, dmg: 10, size: 6 });
+      // 首领子弹：猩红色，稍微加大
+      ebullets.push({ x: b.x, y: b.y, vx: Math.cos(a) * 230, vy: Math.sin(a) * 230, life: 3, dmg: 10, size: 7, color: "#ff2d55" });
     }
     sfx.shoot();
   }
@@ -2564,10 +2578,11 @@
       if (e.cd <= 0) {
         e.cd = 2.5;
         if (ebullets.length < MAX_EBULLETS) {
+          // 法师子弹：保留青绿色
           ebullets.push({
             x: e.x, y: e.y,
             vx: nx * 220, vy: ny * 220,
-            life: 3, dmg: e.dmg, size: 7
+            life: 3, dmg: e.dmg, size: 7, color: "#50e3c2"
           });
           sfx.shoot();
           addSpark(e.x, e.y, "#50e3c2", false);
@@ -2796,7 +2811,6 @@
     for (let i = 0; i < count; i++) {
       spawnElite();
     }
-    // 每次波次开始必出低语，循环播放
     const loreIdx = (waveIndex - 1) % curStage.lore.length;
     addWhisper(curStage.lore[loreIdx]);
   }
@@ -3000,6 +3014,8 @@
     sfx.levelup();
     addHitstop(0.45, 0.22);
     zoomTarget = 1.14;
+    // 升级冰蓝色冲击波
+    pushRing({ x: player.x, y: player.y, r: player.r, maxR: 180, life: 0.6, color: "142,197,255" });
     pendingUpgrade = true;
     setTimeout(() => {
       pendingUpgrade = false;
@@ -3633,10 +3649,15 @@
       ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 0.4, 0, Math.PI * 2); ctx.fill();
     }
 
+    // 掉落物（经验碎片）颜色分级绘制
     for (const d of drops) {
-      drawGlow(d.x, d.y, 6, "#5cf2a8");
-      ctx.fillStyle = "#8fffc4";
+      const col = d.color || "#8ec5ff";
+      drawGlow(d.x, d.y, d.r * 1.5, col);
+      ctx.fillStyle = col;
       ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2); ctx.fill();
+      // 内层高亮
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath(); ctx.arc(d.x, d.y, d.r * 0.4, 0, Math.PI * 2); ctx.fill();
     }
 
     for (const r of rings) {
@@ -3679,10 +3700,14 @@
       ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(b.x - b.vx * 0.03, b.y - b.vy * 0.03); ctx.stroke();
     }
 
+    // 敌方子弹绘制（使用各自的颜色：法师青绿，首领猩红）
     for (const b of ebullets) {
-      drawGlow(b.x, b.y, b.size + 4, "#ff3366");
-      ctx.fillStyle = "#ff3366";
+      const col = b.color || "#ff2d55";
+      drawGlow(b.x, b.y, b.size + 4, col);
+      ctx.fillStyle = col;
       ctx.beginPath(); ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath(); ctx.arc(b.x, b.y, b.size * 0.4, 0, Math.PI * 2); ctx.fill();
     }
 
     for (const m of missiles) {
@@ -3868,7 +3893,7 @@
     }
     ctx.globalAlpha = 1;
 
-    // ===== 修复后的低语显示 =====
+    // 低语显示修复（兼容老版本浏览器的方块底色）
     for (const w of whispers) {
       const k = Math.min(1, w.life / 0.8) * Math.min(1, (w.maxLife - w.life) / 0.5);
       ctx.globalAlpha = k;
@@ -3878,23 +3903,17 @@
       const tw = ctx.measureText(w.text).width;
       const padding = 16;
       
-      // 黑色半透明底
       ctx.fillStyle = "rgba(10, 12, 20, 0.75)";
-      ctx.beginPath();
-      ctx.roundRect(W / 2 - tw / 2 - padding, H - 130, tw + padding * 2, 34, 8);
-      ctx.fill();
+      ctx.fillRect(W / 2 - tw / 2 - padding, H - 130, tw + padding * 2, 34);
       
-      // 边框
       ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
       ctx.lineWidth = 1;
-      ctx.stroke();
+      ctx.strokeRect(W / 2 - tw / 2 - padding, H - 130, tw + padding * 2, 34);
 
-      // 文字
       ctx.fillStyle = "#a8b0c8";
       ctx.fillText(w.text, W / 2, H - 108);
     }
     ctx.globalAlpha = 1;
-    // ======================
 
     if (boss && boss.hp > 0) {
       ctx.fillStyle = "rgba(255,40,80,0.05)";
