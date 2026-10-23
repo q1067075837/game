@@ -64,7 +64,6 @@
   .hp-bar { height: 100%; background: #ff4d6a; width: 100%; transition: width .12s; }
   .xp-bar { height: 100%; background: #5cf2a8; width: 0%; transition: width .12s; }
   
-  /* HUD 图标化 */
   #weaponText { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; max-width: 200px; margin-top: 4px;}
   .w-tag {
     display: inline-flex; align-items: center; justify-content: center;
@@ -305,7 +304,6 @@
   </div>
 </div>
 
-<!-- 通用事件面板（祭坛 / 血泉） -->
 <div class="upgrade-panel hidden" id="eventPanel">
   <div class="upgrade-title" id="eventTitle" style="color:#ff9f45">神秘事件</div>
   <div style="font-size:13px;color:#9aa0b4;margin-bottom:16px;text-align:center" id="eventDesc"></div>
@@ -463,7 +461,6 @@
   const upgradeActions = document.getElementById("upgradeActions");
   const rerollBtn = document.getElementById("rerollBtn");
   
-  // 通用事件面板
   const eventPanel = document.getElementById("eventPanel");
   const eventTitle = document.getElementById("eventTitle");
   const eventDesc = document.getElementById("eventDesc");
@@ -679,8 +676,7 @@
   let bloodPools = [];
   let curse = null;
   
-  // 替换单一的祭坛，改为随机事件
-  let activeEvent = null; // { type: 'altar' | 'chest' | 'fountain', x, y, r, activated, life }
+  let activeEvent = null; 
   let eventOpening = false;
   let ambushActive = false;
 
@@ -1064,8 +1060,8 @@
   }
 
   function addWhisper(text) {
-    whispers.push({ text, life: 4, maxLife: 4 });
-    if (whispers.length > 1) whispers.shift();
+    whispers.push({ text, life: 5, maxLife: 5 });
+    if (whispers.length > 2) whispers.shift();
   }
 
   let DPR = 1;
@@ -1264,7 +1260,6 @@
           y: py + (t.e.y - py) * k + jitter
         });
       }
-      // 羁绊：血怒（暴击+吸血），闪电变为血红色
       const isBloodRage = stats.rage >= 2 && stats.blood >= 2;
       const chainColor = isBloodRage ? "#ff3366" : "#ffd166";
       lightningChains.push({ pts, life: 0.2, maxLife: 0.2, color: chainColor });
@@ -1272,7 +1267,6 @@
       const d = Math.hypot(t.e.x - px, t.e.y - py) || 1;
       hitEnemy(t.e, baseDmg * 0.4, { x: (t.e.x - px) / d * 100, y: (t.e.y - py) / d * 100 }, { isChainHit: true });
       
-      // 血怒吸血效果
       if (isBloodRage) {
         player.hp = Math.min(pMaxHp(), player.hp + baseDmg * 0.4 * 0.3);
       }
@@ -1298,7 +1292,6 @@
           hitEnemy(e, b.dmg, { x: b.vx * 0.12, y: b.vy * 0.12 }, { isChainHit: false });
           if (stats.whine >= 3) bladeMark(e);
           
-          // 羁绊：烈焰风暴（炼狱 + 环绕），被点燃的敌人被飞刃击中会爆炸
           if (weapons.inferno.owned && e.st.burnT > 0) {
             fireExplosion(e);
           }
@@ -1355,31 +1348,40 @@
     }
   }
 
-  // ===== 随机事件系统 =====
   function spawnRandomEvent() {
     const a = Math.random() * Math.PI * 2;
-    let x = player.x + Math.cos(a) * 150;
-    let y = player.y + Math.sin(a) * 150;
+    let x = player.x + Math.cos(a) * 160;
+    let y = player.y + Math.sin(a) * 160;
     x = Math.max(60, Math.min(WORLD - 60, x));
     y = Math.max(60, Math.min(WORLD - 60, y));
 
     const rand = Math.random();
     let type = 'altar';
-    if (rand < 0.4) type = 'altar';
-    else if (rand < 0.7) type = 'chest';
-    else if (rand < 0.9) type = 'fountain';
+    if (rand < 0.35) type = 'altar';
+    else if (rand < 0.65) type = 'chest';
+    else if (rand < 0.90) type = 'fountain';
     else type = 'ambush';
 
     if (type === 'ambush') {
       ambushActive = true;
       announce("深渊突袭！下一波敌人将陷入疯狂", "#ff3366");
       addWhisper("它们从阴影中涌出，无穷无尽...");
-      return; // 突袭不生成物理实体
+      return;
     }
 
-    activeEvent = { type, x, y, r: 24, activated: false, life: WAVE_REST + 1 };
-    if (type === 'chest') addWhisper("那是前人留下的遗物。");
-    if (type === 'fountain') addWhisper("泉水中流淌的，是诱人的毒药。");
+    activeEvent = { type, x, y, r: 26, activated: false, life: 20 };
+    
+    if (type === 'chest') {
+      announce("发现遗物宝箱！", "#ffd166");
+      addWhisper("那是前人留下的遗物。");
+    }
+    if (type === 'fountain') {
+      announce("血祭之泉涌现！", "#ff3366");
+      addWhisper("泉水中流淌的，是诱人的毒药。");
+    }
+    if (type === 'altar') {
+      announce("深渊祭坛浮现...", "#ff9f45");
+    }
   }
 
   function updateEvent(dt) {
@@ -1399,13 +1401,11 @@
     activeEvent.activated = true;
 
     if (activeEvent.type === 'chest') {
-      // 宝箱直接开启，不弹面板
       eventOpening = false;
       paused = false;
       lastTime = performance.now();
       player.xp += 50;
       runSouls += 50;
-      announce("获得宝藏！XP +50 · 魂 +50", "#ffd166");
       burst(activeEvent.x, activeEvent.y, "#ffd166", 25, 250);
       activeEvent = null;
       sfx.win();
@@ -1423,10 +1423,9 @@
       btn.innerHTML = "<h3>饮下泉水</h3><p>失去 25% 最大生命上限，获得随机强化</p><div class='lore'>" + "灵魂被禁锢在肉体中，无法解脱。" + "</div>";
       btn.addEventListener("click", () => {
         const hpLoss = Math.floor(pMaxHp() * 0.25);
-        stats.hp -= Math.floor(hpLoss / 25); // 减少对应等级的hp
+        stats.hp -= Math.floor(hpLoss / 25);
         if (stats.hp < 0) stats.hp = 0;
         player.hp = pMaxHp();
-        // 随机给一个属性
         const pool = ['dmg', 'rate', 'crit', 'mov'];
         const pick = pool[Math.floor(Math.random() * pool.length)];
         stats[pick]++;
@@ -1478,10 +1477,12 @@
     eventOpening = false;
     paused = false;
     lastTime = performance.now();
-    inRest = false;
-    waveIndex++;
-    waveTimer = WAVE_DURATION;
-    startWave();
+    if (inRest) {
+      inRest = false;
+      waveIndex++;
+      waveTimer = WAVE_DURATION;
+      startWave();
+    }
   }
 
   function chooseCurse(c) {
@@ -1547,7 +1548,6 @@
     pauseScreen.classList.add("hidden");
     running = true; lastTime = performance.now();
     
-    // 叙事：进入关卡
     announce(curStage.name + " · 第 1 波", "#8ec5ff");
     addWhisper(curStage.lore[0]);
     
@@ -2023,7 +2023,6 @@
     let bw = canBomber ? (w.bomber || 0) : 0;
 
     if (ambushActive) {
-      // 深渊突袭：大幅增加自爆兵和快速怪概率
       fw *= 3; bw *= 5; nw *= 0.2; tw = 0; mw = 0;
     }
 
@@ -2164,7 +2163,7 @@
     else if (Math.random() < 0.6) addSpark(e.x, e.y, "#ffffff", false);
     if (crit) sfx.crit(); else sfx.hit();
     
-    return crit; // 返回是否暴击，供羁绊使用
+    return crit;
   }
 
   function killEnemy(e, i) {
@@ -2359,7 +2358,6 @@
           const isCrit = hitEnemy(e, dmg, { x: (dx / d) * 90, y: (dy / d) * 90 });
           e.cd = 0.35; sfx.orbit();
           
-          // 羁绊：刃暴（环绕+暴击），暴击时立即弹射一枚小飞刃
           if (stats.whine >= 2 && stats.crit >= 2 && isCrit) {
             const ang = Math.atan2(e.y - player.y, e.x - player.x);
             subBlades.push({
@@ -2381,7 +2379,6 @@
             }
           }
 
-          // 羁绊：烈焰风暴
           if (weapons.inferno.owned && e.st.burnT > 0) {
             fireExplosion(e);
           }
@@ -2799,11 +2796,9 @@
     for (let i = 0; i < count; i++) {
       spawnElite();
     }
-    // 周期性叙事
-    if (waveIndex % 2 === 1) {
-      const loreIdx = Math.min(curStage.lore.length - 1, Math.floor(waveIndex / 2));
-      addWhisper(curStage.lore[loreIdx]);
-    }
+    // 每次波次开始必出低语，循环播放
+    const loreIdx = (waveIndex - 1) % curStage.lore.length;
+    addWhisper(curStage.lore[loreIdx]);
   }
 
   function updateWaves(dt) {
@@ -2816,7 +2811,6 @@
       if (restTimer <= 0) {
         inRest = false; waveIndex++;
         waveTimer = WAVE_DURATION;
-        activeEvent = null;
         ambushActive = false;
         startWave();
       }
@@ -2905,7 +2899,6 @@
     burst(player.x, player.y, r.color, 46, 340);
     pushRing({ x: player.x, y: player.y, r: player.r, maxR: 260, life: 0.9, color: hexToRgbTriplet(r.color) });
     
-    // 羁绊播报检查
     if (r.id === 'tempest' && stats.rage > 0) announce("羁绊激活 · 刃暴", "#ffd166");
   }
 
@@ -3095,7 +3088,6 @@
       : `${curStage.name} · 第 ${waveIndex} 波` + (inRest ? " · 喘息" : "");
     killText.textContent = "击杀 " + kills;
     
-    // HUD 武器图标化
     weaponText.innerHTML = Object.keys(weaponDefs)
       .filter((id) => weapons[id].owned)
       .map((id) => {
@@ -3338,6 +3330,9 @@
     for (const e of enemies) {
       if (e.kind === "elite") list.push({ x: e.x, y: e.y, color: e.color, size: 8 });
     }
+    if (activeEvent && !activeEvent.activated) {
+      list.push({ x: activeEvent.x, y: activeEvent.y, color: activeEvent.type === 'chest' ? "#ffd166" : activeEvent.type === 'fountain' ? "#ff3366" : "#ff9f45", size: 10 });
+    }
     if (!list.length) return;
     const cx = W / 2, cy = H / 2, margin = 56;
     for (const t of list) {
@@ -3557,7 +3552,6 @@
 
     drawDecor(camX, camY);
 
-    // 绘制事件实体
     if (activeEvent) {
       ctx.save();
       ctx.translate(activeEvent.x, activeEvent.y);
@@ -3592,7 +3586,6 @@
         gg.addColorStop(1, "rgba(255,209,102,0)");
         ctx.fillStyle = gg;
         ctx.beginPath(); ctx.arc(0, 0, activeEvent.r * 2.5, 0, Math.PI * 2); ctx.fill();
-        // 宝箱形状
         ctx.fillStyle = "#5c3a21";
         ctx.fillRect(-15, -10, 30, 20);
         ctx.fillStyle = "#ffd166";
@@ -3609,7 +3602,6 @@
         gg.addColorStop(1, "rgba(255,51,102,0)");
         ctx.fillStyle = gg;
         ctx.beginPath(); ctx.arc(0, 0, activeEvent.r * 2.5, 0, Math.PI * 2); ctx.fill();
-        // 泉水形状
         ctx.fillStyle = "#ff3366";
         ctx.beginPath(); ctx.arc(0, 0, activeEvent.r, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = "#fff";
@@ -3876,15 +3868,33 @@
     }
     ctx.globalAlpha = 1;
 
-    // 叙事低语（飘字）
+    // ===== 修复后的低语显示 =====
     for (const w of whispers) {
       const k = Math.min(1, w.life / 0.8) * Math.min(1, (w.maxLife - w.life) / 0.5);
-      ctx.globalAlpha = k * 0.8;
-      ctx.fillStyle = "#8b90a8";
-      ctx.font = "italic 14px system-ui";
-      ctx.fillText(w.text, W / 2, H - 100);
+      ctx.globalAlpha = k;
+      ctx.font = "italic 15px system-ui";
+      ctx.textAlign = "center";
+      
+      const tw = ctx.measureText(w.text).width;
+      const padding = 16;
+      
+      // 黑色半透明底
+      ctx.fillStyle = "rgba(10, 12, 20, 0.75)";
+      ctx.beginPath();
+      ctx.roundRect(W / 2 - tw / 2 - padding, H - 130, tw + padding * 2, 34, 8);
+      ctx.fill();
+      
+      // 边框
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // 文字
+      ctx.fillStyle = "#a8b0c8";
+      ctx.fillText(w.text, W / 2, H - 108);
     }
     ctx.globalAlpha = 1;
+    // ======================
 
     if (boss && boss.hp > 0) {
       ctx.fillStyle = "rgba(255,40,80,0.05)";
@@ -4008,7 +4018,22 @@
       evolutionFx,
       primaryWeapon: primaryWeapon(),
       isTouch: isTouchDevice, lowEnd, tutorialState, ambushActive
-    }; }
+    }; },
+    spawnEvent(type) {
+      if (!running) return;
+      if (activeEvent) activeEvent = null;
+      
+      const a = Math.random() * Math.PI * 2;
+      let x = player.x + Math.cos(a) * 160;
+      let y = player.y + Math.sin(a) * 160;
+      x = Math.max(60, Math.min(WORLD - 60, x));
+      y = Math.max(60, Math.min(WORLD - 60, y));
+      
+      activeEvent = { type, x, y, r: 26, activated: false, life: 20 };
+      if (type === 'chest') announce("发现遗物宝箱！", "#ffd166");
+      if (type === 'fountain') announce("血祭之泉涌现！", "#ff3366");
+      if (type === 'altar') announce("深渊祭坛浮现...", "#ff9f45");
+    }
   };
 
   initLoadout();
